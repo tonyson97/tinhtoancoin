@@ -93,4 +93,125 @@ h2 {
     margin-bottom: 20px;
     color: #333;
     text-align: center;
+}
+
+/* Thêm styles mới */
+.feature-menu {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.menu-btn {
+    flex: 1;
+    padding: 12px;
+    background-color: #f0f2f5;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.menu-btn.active {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.common-inputs {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.feature-section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    display: none;
+}
+
+.feature-section.active {
+    display: block;
+}
+
+.result {
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    display: none;
+}
+
+.result.profit {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.result.loss {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.history-item {
+    background-color: #fff;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 4px solid #4CAF50;
+}
+
+.history-item.profit {
+    border-left-color: #28a745;
+}
+
+.history-item.loss {
+    border-left-color: #dc3545;
+}
+
+@media (max-width: 768px) {
+    .calculator-container {
+        padding: 15px;
+    }
+
+    .feature-menu {
+        flex-direction: column;
+    }
+
+    .menu-btn {
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+
+    .input-group {
+        margin-bottom: 15px;
+    }
+}
+
+.history-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+}
+
+.clear-history-btn {
+    background-color: #dc3545;
+    width: auto;
+    padding: 8px 15px;
+    margin-bottom: 0;
+}
+
+.clear-history-btn:hover {
+    background-color: #c82333;
 } 

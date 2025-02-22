@@ -9,26 +9,53 @@
 <body>
     <div class="calculator-container">
         <h1>Crypto Profit Calculator</h1>
-        <div class="input-group">
-            <label for="initialPrice">giá coin lúc mua (USD):</label>
-            <input type="number" id="initialPrice" step="0.001" value="16.025">
-        </div>
-        <div class="input-group">
-            <label for="leverage">đòn bẩy:</label>
-            <input type="number" id="leverage" value="50">
-        </div>
-        <div class="input-group">
-            <label for="investment">số tiền đầu tư (USD):</label>
-            <input type="number" id="investment" value="40">
-        </div>
-        <div class="input-group">
-            <label for="targetProfit">mục tiêu lợi nhuận (USD):</label>
-            <input type="number" id="targetProfit" value="1000">
-        </div>
-        <button onclick="calculate()">Calculate</button>
-        <div class="result" id="result"></div>
         
+        <!-- Menu chọn tính năng -->
+        <div class="feature-menu">
+            <button class="menu-btn active" onclick="switchFeature('target')">Tính giá mục tiêu</button>
+            <button class="menu-btn" onclick="switchFeature('current')">Tính lãi lỗ hiện tại</button>
+        </div>
+
+        <!-- Thông tin chung -->
+        <div class="common-inputs">
+            <div class="input-group">
+                <label for="initialPrice">giá coin lúc mua (USD):</label>
+                <input type="number" id="initialPrice" step="0.001" value="16.025">
+            </div>
+            <div class="input-group">
+                <label for="leverage">đòn bẩy:</label>
+                <input type="number" id="leverage" value="50">
+            </div>
+            <div class="input-group">
+                <label for="investment">số tiền đầu tư (USD):</label>
+                <input type="number" id="investment" value="40">
+            </div>
+        </div>
+
+        <!-- Phần tính giá mục tiêu -->
+        <div class="feature-section active" id="target-section">
+            <div class="input-group">
+                <label for="targetProfit">mục tiêu lợi nhuận (USD):</label>
+                <input type="number" id="targetProfit" value="1000">
+            </div>
+            <button onclick="calculate()">Tính giá mục tiêu</button>
+            <div class="result" id="result"></div>
+        </div>
+
+        <!-- Phần tính lãi lỗ hiện tại -->
+        <div class="feature-section" id="current-section">
+            <div class="input-group">
+                <label for="currentPrice">giá coin hiện tại (USD):</label>
+                <input type="number" id="currentPrice" step="0.001">
+            </div>
+            <button onclick="calculateCurrentProfit()">Tính lãi lỗ hiện tại</button>
+            <div class="result" id="currentProfitResult"></div>
+        </div>
+
         <h2>Lịch sử tính toán</h2>
+        <div class="history-header">
+            <button class="clear-history-btn" onclick="clearHistory()">Xóa lịch sử</button>
+        </div>
         <div id="history"></div>
     </div>
     <script src="script.js"></script>
