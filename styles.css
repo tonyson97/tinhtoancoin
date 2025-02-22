@@ -178,24 +178,35 @@ h2 {
 }
 
 @media (max-width: 768px) {
+    body {
+        padding: 0;
+        background-color: white;
+    }
+
     .calculator-container {
         padding: 15px;
-    }
-
-    .feature-menu {
-        flex-direction: column;
-    }
-
-    .menu-btn {
-        width: 100%;
+        border-radius: 0;
+        box-shadow: none;
+        max-width: none;
     }
 
     h1 {
         font-size: 1.5em;
+        margin-bottom: 20px;
     }
 
     .input-group {
         margin-bottom: 15px;
+    }
+
+    input {
+        font-size: 1em;
+        padding: 12px;
+    }
+
+    button {
+        padding: 15px;
+        font-size: 1.1em;
     }
 }
 
