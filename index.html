@@ -17,54 +17,60 @@
             <button class="menu-btn" onclick="switchFeature('spot')">Tính Spot</button>
         </div>
 
-        <!-- Thông tin chung -->
-        <div class="common-inputs">
+        <!-- Common Inputs -->
+        <div id="common-inputs">
             <div class="input-group">
-                <label for="initialPrice">giá coin lúc mua (USD):</label>
-                <input type="number" id="initialPrice" step="0.001" value="16.025">
+                <label for="initialPrice">giá mua ban đầu (USD)</label>
+                <input type="text" id="initialPrice" placeholder="Ví dụ: 0.045" step="0.001" min="0" onkeyup="formatInputValue(this)">
             </div>
             <div class="input-group">
-                <label for="investment">số tiền đầu tư (USD):</label>
-                <input type="number" id="investment" value="40">
+                <label for="investment">số tiền đầu tư (USD)</label>
+                <input type="text" id="investment" placeholder="Ví dụ: 100" step="0.01" min="0" onkeyup="formatInputValue(this)">
             </div>
         </div>
 
-        <!-- Phần tính giá mục tiêu -->
-        <div class="feature-section active" id="target-section">
+        <!-- Target Price Section -->
+        <div id="target-section" class="feature-section">
             <div class="input-group">
-                <label for="leverage">đòn bẩy:</label>
-                <input type="number" id="leverage" value="50">
+                <label for="leverage">đòn bẩy</label>
+                <input type="text" id="leverage" placeholder="Ví dụ: 50" value="50" step="0.1" min="1" onkeyup="formatInputValue(this)">
             </div>
             <div class="input-group">
-                <label for="targetProfit">mục tiêu lợi nhuận (USD):</label>
-                <input type="number" id="targetProfit" value="1000">
+                <label for="targetProfit">mục tiêu lãi (USD)</label>
+                <input type="text" id="targetProfit" placeholder="Ví dụ: 50" step="0.01" min="0" onkeyup="formatInputValue(this)">
             </div>
-            <button onclick="calculate()">Tính giá mục tiêu</button>
-            <div class="result" id="result"></div>
+            <div class="button-wrapper">
+                <button onclick="calculate()">tính giá mục tiêu</button>
+            </div>
+            <div id="result" class="result"></div>
         </div>
 
-        <!-- Phần tính lãi lỗ hiện tại -->
-        <div class="feature-section" id="current-section">
+        <!-- Current Profit Section -->
+        <div id="current-section" class="feature-section">
             <div class="input-group">
-                <label for="currentLeverage">đòn bẩy:</label>
-                <input type="number" id="currentLeverage" value="50">
+                <label for="currentLeverage">đòn bẩy</label>
+                <input type="text" id="currentLeverage" placeholder="Ví dụ: 50" value="50" step="0.1" min="1" onkeyup="formatInputValue(this)">
             </div>
             <div class="input-group">
-                <label for="currentPrice">giá coin hiện tại (USD):</label>
-                <input type="number" id="currentPrice" step="0.001">
+                <label for="currentPrice">giá hiện tại (USD)</label>
+                <input type="text" id="currentPrice" placeholder="Ví dụ: 0.048" step="0.001" min="0" onkeyup="formatInputValue(this)">
             </div>
-            <button onclick="calculateCurrentProfit()">Tính lãi lỗ hiện tại</button>
-            <div class="result" id="currentProfitResult"></div>
+            <div class="button-wrapper">
+                <button onclick="calculateCurrentProfit()">tính lãi/lỗ hiện tại</button>
+            </div>
+            <div id="currentProfitResult" class="result"></div>
         </div>
 
-        <!-- Phần tính lãi lỗ giao dịch spot -->
-        <div class="feature-section" id="spot-section">
+        <!-- Spot Trade Section -->
+        <div id="spot-section" class="feature-section">
             <div class="input-group">
-                <label for="spotTargetPrice">giá mục tiêu (USD):</label>
-                <input type="number" id="spotTargetPrice" step="0.001">
+                <label for="spotTargetPrice">giá mục tiêu (USD)</label>
+                <input type="text" id="spotTargetPrice" placeholder="Ví dụ: 0.052" step="0.001" min="0" onkeyup="formatInputValue(this)">
             </div>
-            <button onclick="calculateSpotTarget()">Tính lãi lỗ mục tiêu</button>
-            <div class="result" id="spotProfitResult"></div>
+            <div class="button-wrapper">
+                <button onclick="calculateSpotTarget()">tính lãi/lỗ spot</button>
+            </div>
+            <div id="spotProfitResult" class="result"></div>
         </div>
 
         <h2>Lịch sử tính toán</h2>

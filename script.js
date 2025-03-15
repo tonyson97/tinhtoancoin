@@ -1,3 +1,55 @@
+// Hàm định dạng số với dấu phẩy làm dấu thập phân
+function formatNumber(number, decimals = 2) {
+    if (isNaN(number) || number === null) return '0';
+    
+    // Làm tròn số đến số thập phân yêu cầu
+    const fixed = parseFloat(number).toFixed(decimals);
+    
+    // Chia phần nguyên và phần thập phân
+    const parts = fixed.toString().split('.');
+    
+    // Thêm dấu phân cách hàng nghìn cho phần nguyên
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    
+    // Ghép lại với dấu phẩy làm dấu thập phân
+    return parts.join(',');
+}
+
+// Hàm xử lý định dạng khi nhập vào input
+function formatInputValue(inputElement) {
+    let value = inputElement.value;
+    
+    // Chỉ giữ lại số và dấu phẩy/chấm
+    value = value.replace(/[^\d.,]/g, '');
+    
+    // Chuyển đổi dấu chấm thành dấu phẩy
+    value = value.replace(/\./g, ',');
+    
+    // Đảm bảo chỉ có một dấu phẩy
+    const parts = value.split(',');
+    if (parts.length > 2) {
+        value = parts[0] + ',' + parts.slice(1).join('');
+    }
+    
+    // Cập nhật giá trị input
+    inputElement.value = value;
+}
+
+// Hàm lấy giá trị số từ input đã định dạng
+function parseFormattedNumber(value) {
+    if (!value) return 0;
+    
+    // Chuyển đổi định dạng số Việt Nam (dấu phẩy là dấu thập phân, dấu chấm là phân cách hàng nghìn)
+    // sang định dạng JavaScript
+    return parseFloat(value.replace(/\./g, '').replace(/,/g, '.'));
+}
+
+// Kiểm tra giá trị hợp lệ
+function validateInput(value, min = 0) {
+    const num = parseFloat(value);
+    return !isNaN(num) && num >= min;
+}
+
 function calculateSellPrice(initialPrice, leverage, investment, targetProfit) {
     // Công thức tính giá bán để đạt được lợi nhuận mục tiêu với đòn bẩy
     // targetProfit = investment * leverage * (priceChangeRatio)
@@ -11,97 +63,98 @@ function calculateSellPrice(initialPrice, leverage, investment, targetProfit) {
     return sellPrice;
 }
 
-function saveToLocalStorage(data) {
-    // Get existing calculations or initialize empty array
-    let calculations = JSON.parse(localStorage.getItem('calculations') || '[]');
+function saveToLocalStorage(calculation) {
+    // Thêm timestamp
+    calculation.timestamp = new Date().toLocaleString();
     
-    // Add timestamp to the data
-    data.timestamp = new Date().toLocaleString('vi-VN');
+    // Lấy lịch sử tính toán hiện tại từ localStorage
+    const history = JSON.parse(localStorage.getItem('calculationHistory')) || [];
     
-    // Add new calculation to beginning of array
-    calculations.unshift(data);
+    // Thêm kết quả tính toán mới vào cuối mảng
+    history.push(calculation);
     
-    // Keep only last 10 calculations
-    if (calculations.length > 10) {
-        calculations = calculations.slice(0, 10);
-    }
+    // Giới hạn lịch sử tới 30 mục gần nhất
+    const limitedHistory = history.slice(-30);
     
-    // Save back to localStorage
-    localStorage.setItem('calculations', JSON.stringify(calculations));
+    // Lưu lại vào localStorage
+    localStorage.setItem('calculationHistory', JSON.stringify(limitedHistory));
 }
 
 function displayHistory() {
-    const calculations = JSON.parse(localStorage.getItem('calculations') || '[]');
-    const historyHtml = calculations.map(calc => {
+    const history = JSON.parse(localStorage.getItem('calculationHistory')) || [];
+    const historyElement = document.getElementById('history');
+    historyElement.innerHTML = '';
+
+    // Take the last 10 calculations and reverse to show newest first
+    const recentHistory = history.slice(-10).reverse();
+
+    recentHistory.forEach(calc => {
+        let historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+
+        // Tính profit/loss class
+        let profitLossClass = '';
+        let profitLossText = '';
+        let profitValue = 0;
+
+        // Xử lý dựa vào loại tính toán
         if (calc.type === 'current_profit') {
-            const profitClass = parseFloat(calc.profit) > 0 ? 'profit' : 'loss';
-            const profitValue = parseFloat(calc.profit);
-            const profitText = profitValue >= 0 ? 'Lãi' : 'Lỗ';
-            const profitAbsValue = Math.abs(profitValue);
-            return `
-                <div class="history-item ${profitClass}">
-                    <div class="history-time">${calc.timestamp}</div>
-                    <div>Loại: Tính lãi lỗ hiện tại</div>
-                    <div>Giá vào: ${calc.initialPrice} USD</div>
-                    <div>Giá hiện tại: ${calc.currentPrice} USD</div>
-                    <div>Đòn bẩy: ${calc.leverage}x</div>
-                    <div>Vốn: ${calc.investment} USD</div>
-                    <div>Thay đổi: ${calc.priceChange} USD (${calc.priceChangePercent}%)</div>
-                    <div>${profitText}: ${profitAbsValue} USD</div>
-                </div>
+            profitValue = parseFloat(calc.profit);
+            profitLossClass = profitValue > 0 ? 'profit' : 'loss';
+            profitLossText = profitValue > 0 ? 'Lãi' : 'Lỗ';
+
+            historyItem.innerHTML = `
+                <strong>Lãi/Lỗ hiện tại:</strong>
+                <div>Giá ban đầu: ${formatNumber(calc.initialPrice, 3)} USD</div>
+                <div>Giá hiện tại: ${formatNumber(calc.currentPrice, 3)} USD</div>
+                <div>Đòn bẩy: ${formatNumber(calc.leverage, 1)}x</div>
+                <div>Đầu tư: ${formatNumber(calc.investment, 2)} USD</div>
+                <div>Thay đổi giá: ${formatNumber(calc.priceChange, 3)} USD (${formatNumber(calc.priceChangePercent, 2)}%)</div>
+                <div class="${profitLossClass}">${profitLossText}: ${formatNumber(Math.abs(profitValue), 2)} USD</div>
             `;
         } else if (calc.type === 'spot') {
-            const profitClass = parseFloat(calc.priceChangePercent) > 0 ? 'profit' : 'loss';
-            
-            // Thêm thông tin lãi/lỗ
-            const profitValue = parseFloat(calc.profit);
-            const profitText = profitValue >= 0 ? 'Lãi' : 'Lỗ';
-            const profitAbsValue = Math.abs(profitValue);
-            
-            return `
-                <div class="history-item ${profitClass}">
-                    <div class="history-time">${calc.timestamp}</div>
-                    <div>Loại: Tính Spot</div>
-                    <div>Giá vào: ${calc.initialPrice} USD</div>
-                    <div>Giá mục tiêu: ${calc.targetPrice} USD</div>
-                    <div>Số tiền đầu tư: ${calc.investment} USD</div>
-                    <div>Số coin quy đổi: ${calc.coinAmount}</div>
-                    <div>Thay đổi: ${calc.priceChange} USD (${calc.priceChangePercent}%)</div>
-                    <div>${profitText}: ${profitAbsValue} USD</div>
-                </div>
+            profitValue = parseFloat(calc.profit);
+            profitLossClass = profitValue > 0 ? 'profit' : 'loss';
+            profitLossText = profitValue > 0 ? 'Lãi' : 'Lỗ';
+
+            historyItem.innerHTML = `
+                <strong>Spot:</strong>
+                <div>Giá ban đầu: ${formatNumber(calc.initialPrice, 3)} USD</div>
+                <div>Giá mục tiêu: ${formatNumber(calc.targetPrice, 3)} USD</div>
+                <div>Đầu tư: ${formatNumber(calc.investment, 2)} USD</div>
+                <div>Số coin: ${formatNumber(calc.coinAmount, 6)}</div>
+                <div>Thay đổi giá: ${formatNumber(calc.priceChangePercent, 2)}%</div>
+                <div class="${profitLossClass}">${profitLossText}: ${formatNumber(Math.abs(profitValue), 2)} USD</div>
             `;
         } else {
-            return `
-                <div class="history-item">
-                    <div class="history-time">${calc.timestamp}</div>
-                    <div>Loại: Tính giá mục tiêu</div>
-                    <div>Giá vào: ${calc.initialPrice} USD</div>
-                    <div>Đòn bẩy: ${calc.leverage}x</div>
-                    <div>Vốn: ${calc.investment} USD</div>
-                    <div>Mục tiêu: ${calc.targetProfit} USD</div>
-                    <div>Giá mục tiêu: ${calc.sellPrice} USD</div>
-                    <div>Tăng: ${calc.percentageIncrease}%</div>
-                </div>
+            // Target price calculation history
+            historyItem.innerHTML = `
+                <strong>Đích đến giá:</strong>
+                <div>Giá ban đầu: ${formatNumber(calc.initialPrice, 3)} USD</div>
+                <div>Đòn bẩy: ${formatNumber(calc.leverage, 1)}x</div>
+                <div>Đầu tư: ${formatNumber(calc.investment, 2)} USD</div>
+                <div>Mục tiêu lãi: ${formatNumber(calc.targetProfit, 2)} USD</div>
+                <div>Giá bán: ${formatNumber(calc.sellPrice, 3)} USD</div>
+                <div>Tăng giá: ${formatNumber(calc.percentageIncrease, 2)}%</div>
             `;
         }
-    }).join('');
 
-    const historyElement = document.getElementById('history');
-    if (historyElement) {
-        historyElement.innerHTML = historyHtml;
-    }
+        // Add the history item to the history element
+        historyElement.appendChild(historyItem);
+    });
 }
 
 function calculate() {
     // Get input values
-    const initialPrice = parseFloat(document.getElementById('initialPrice').value);
-    const leverage = parseFloat(document.getElementById('leverage').value);
-    const investment = parseFloat(document.getElementById('investment').value);
-    const targetProfit = parseFloat(document.getElementById('targetProfit').value);
+    const initialPrice = parseFormattedNumber(document.getElementById('initialPrice').value);
+    const leverage = parseFormattedNumber(document.getElementById('leverage').value);
+    const investment = parseFormattedNumber(document.getElementById('investment').value);
+    const targetProfit = parseFormattedNumber(document.getElementById('targetProfit').value);
 
     // Validate inputs
-    if (!initialPrice || !leverage || !investment || !targetProfit) {
-        alert('Vui lòng điền đầy đủ thông tin');
+    if (!validateInput(initialPrice) || !validateInput(leverage, 1) || 
+        !validateInput(investment) || !validateInput(targetProfit)) {
+        alert('Vui lòng điền đầy đủ thông tin với giá trị hợp lệ');
         return;
     }
 
@@ -126,8 +179,8 @@ function calculate() {
     const resultElement = document.getElementById('result');
     resultElement.innerHTML = `
         <strong>kết quả:</strong><br>
-        đích đến giá: ${sellPrice.toFixed(3)} USD<br>
-        tăng giá bao nhiêu %: ${percentageIncrease.toFixed(2)}%
+        đích đến giá: ${formatNumber(sellPrice, 3)} USD<br>
+        tăng giá bao nhiêu %: ${formatNumber(percentageIncrease, 2)}%
     `;
     resultElement.classList.add('show');
 
@@ -179,18 +232,18 @@ function switchFeature(feature) {
 }
 
 function calculateCurrentProfit() {
-    const initialPrice = parseFloat(document.getElementById('initialPrice').value);
-    const currentPrice = parseFloat(document.getElementById('currentPrice').value);
-    const leverage = parseFloat(document.getElementById('currentLeverage').value);
-    const investment = parseFloat(document.getElementById('investment').value);
+    const initialPrice = parseFormattedNumber(document.getElementById('initialPrice').value);
+    const currentPrice = parseFormattedNumber(document.getElementById('currentPrice').value);
+    const leverage = parseFormattedNumber(document.getElementById('currentLeverage').value);
+    const investment = parseFormattedNumber(document.getElementById('investment').value);
 
-    if (!currentPrice) {
-        alert('Vui lòng nhập giá hiện tại');
+    if (!validateInput(currentPrice)) {
+        alert('Vui lòng nhập giá hiện tại hợp lệ');
         return;
     }
 
-    if (!initialPrice || !leverage || !investment) {
-        alert('Vui lòng điền đầy đủ thông tin');
+    if (!validateInput(initialPrice) || !validateInput(leverage, 1) || !validateInput(investment)) {
+        alert('Vui lòng điền đầy đủ thông tin với giá trị hợp lệ');
         return;
     }
 
@@ -205,8 +258,8 @@ function calculateCurrentProfit() {
     const profitAbsValue = Math.abs(profit);
     resultElement.innerHTML = `
         <strong>Kết quả lãi lỗ hiện tại:</strong><br>
-        Thay đổi giá: ${priceChange.toFixed(3)} USD (${priceChangePercent.toFixed(2)}%)<br>
-        ${profitText}: ${profitAbsValue.toFixed(2)} USD
+        Thay đổi giá: ${formatNumber(priceChange, 3)} USD (${formatNumber(priceChangePercent, 2)}%)<br>
+        ${profitText}: ${formatNumber(profitAbsValue, 2)} USD
     `;
     
     resultElement.classList.add('show');
@@ -230,22 +283,22 @@ function calculateCurrentProfit() {
 
 function clearHistory() {
     if (confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử?')) {
-        localStorage.removeItem('calculations');
+        localStorage.removeItem('calculationHistory');
         displayHistory(); // Refresh lại phần hiển thị lịch sử
     }
 }
 
 function calculateSpotTarget() {
-    const initialPrice = parseFloat(document.getElementById('initialPrice').value);
-    const targetPrice = parseFloat(document.getElementById('spotTargetPrice').value);
-    const investment = parseFloat(document.getElementById('investment').value);
+    const initialPrice = parseFormattedNumber(document.getElementById('initialPrice').value);
+    const targetPrice = parseFormattedNumber(document.getElementById('spotTargetPrice').value);
+    const investment = parseFormattedNumber(document.getElementById('investment').value);
 
-    if (!targetPrice) {
-        alert('Vui lòng nhập giá mục tiêu');
+    if (!validateInput(targetPrice)) {
+        alert('Vui lòng nhập giá mục tiêu hợp lệ');
         return;
     }
 
-    if (!initialPrice || !investment) {
+    if (!validateInput(initialPrice) || !validateInput(investment)) {
         alert('Vui lòng điền đầy đủ thông tin về giá mua và số tiền đầu tư ở phần thông tin chung');
         return;
     }
@@ -269,13 +322,13 @@ function calculateSpotTarget() {
     
     resultElement.innerHTML = `
         <strong>Kết quả Spot khi đạt mục tiêu:</strong><br>
-        Giá ban đầu: ${initialPrice.toFixed(3)} USD<br>
-        Giá mục tiêu: ${targetPrice.toFixed(3)} USD<br>
-        Số tiền đầu tư: ${investment.toFixed(2)} USD<br>
-        Số coin quy đổi: ${coinAmount.toFixed(6)}<br>
-        Thay đổi giá: ${priceChange.toFixed(3)} USD<br>
-        ${changeText}: ${changeAbsValue.toFixed(2)}%<br>
-        ${profitText}: ${profitAbsValue.toFixed(2)} USD
+        Giá ban đầu: ${formatNumber(initialPrice, 3)} USD<br>
+        Giá mục tiêu: ${formatNumber(targetPrice, 3)} USD<br>
+        Số tiền đầu tư: ${formatNumber(investment, 2)} USD<br>
+        Số coin quy đổi: ${formatNumber(coinAmount, 6)}<br>
+        Thay đổi giá: ${formatNumber(priceChange, 3)} USD<br>
+        ${changeText}: ${formatNumber(changeAbsValue, 2)}%<br>
+        ${profitText}: ${formatNumber(profitAbsValue, 2)} USD
     `;
     
     resultElement.classList.add('show');
