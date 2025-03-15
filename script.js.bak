@@ -64,8 +64,7 @@ function displayHistory() {
                     <div>Loại: Tính Spot</div>
                     <div>Giá vào: ${calc.initialPrice} USD</div>
                     <div>Giá mục tiêu: ${calc.targetPrice} USD</div>
-                    <div>Số tiền đầu tư: ${calc.investment} USD</div>
-                    <div>Số coin quy đổi: ${calc.coinAmount}</div>
+                    <div>Số lượng coin: ${calc.coinAmount || 1}</div>
                     <div>Thay đổi: ${calc.priceChange} USD (${calc.priceChangePercent}%)</div>
                     <div>${profitText}: ${profitAbsValue} USD</div>
                 </div>
@@ -157,21 +156,8 @@ function switchFeature(feature) {
         result.style.display = 'none';
     });
 
-    // Đồng bộ giá trị đòn bẩy giữa các phần
-    if (feature === 'target') {
-        // Nếu chuyển sang phần tính giá mục tiêu, lấy giá trị từ current nếu đã nhập
-        const currentLeverage = document.getElementById('currentLeverage');
-        const leverage = document.getElementById('leverage');
-        if (currentLeverage.value && leverage) {
-            leverage.value = currentLeverage.value;
-        }
-    } else if (feature === 'current') {
-        // Nếu chuyển sang phần tính lãi lỗ hiện tại, lấy giá trị từ target
-        const currentLeverage = document.getElementById('currentLeverage');
-        const leverage = document.getElementById('leverage');
-        if (leverage.value && currentLeverage) {
-            currentLeverage.value = leverage.value;
-        }
+    // Focus vào ô nhập liệu tương ứng
+    if (feature === 'current') {
         document.getElementById('currentPrice').focus();
     } else if (feature === 'spot') {
         document.getElementById('spotTargetPrice').focus();
@@ -181,7 +167,7 @@ function switchFeature(feature) {
 function calculateCurrentProfit() {
     const initialPrice = parseFloat(document.getElementById('initialPrice').value);
     const currentPrice = parseFloat(document.getElementById('currentPrice').value);
-    const leverage = parseFloat(document.getElementById('currentLeverage').value);
+    const leverage = parseFloat(document.getElementById('leverage').value);
     const investment = parseFloat(document.getElementById('investment').value);
 
     if (!currentPrice) {
@@ -190,7 +176,7 @@ function calculateCurrentProfit() {
     }
 
     if (!initialPrice || !leverage || !investment) {
-        alert('Vui lòng điền đầy đủ thông tin');
+        alert('Vui lòng điền đầy đủ thông tin ở phần thông tin chung');
         return;
     }
 
@@ -238,26 +224,23 @@ function clearHistory() {
 function calculateSpotTarget() {
     const initialPrice = parseFloat(document.getElementById('initialPrice').value);
     const targetPrice = parseFloat(document.getElementById('spotTargetPrice').value);
-    const investment = parseFloat(document.getElementById('investment').value);
+    const coinAmount = parseFloat(document.getElementById('spotCoinAmount').value) || 1;
 
     if (!targetPrice) {
         alert('Vui lòng nhập giá mục tiêu');
         return;
     }
 
-    if (!initialPrice || !investment) {
-        alert('Vui lòng điền đầy đủ thông tin về giá mua và số tiền đầu tư ở phần thông tin chung');
+    if (!initialPrice) {
+        alert('Vui lòng điền giá mua ban đầu ở phần thông tin chung');
         return;
     }
 
-    // Tính số lượng coin dựa trên số tiền đầu tư
-    const coinAmount = investment / initialPrice;
-    
     // Tính toán phần trăm thay đổi giá
     const priceChange = targetPrice - initialPrice;
     const priceChangePercent = (priceChange / initialPrice) * 100;
     
-    // Tính lãi/lỗ dựa trên số lượng coin quy đổi từ số tiền đầu tư
+    // Tính lãi/lỗ dựa trên số lượng coin
     const profit = priceChange * coinAmount;
 
     const resultElement = document.getElementById('spotProfitResult');
@@ -271,8 +254,7 @@ function calculateSpotTarget() {
         <strong>Kết quả Spot khi đạt mục tiêu:</strong><br>
         Giá ban đầu: ${initialPrice.toFixed(3)} USD<br>
         Giá mục tiêu: ${targetPrice.toFixed(3)} USD<br>
-        Số tiền đầu tư: ${investment.toFixed(2)} USD<br>
-        Số coin quy đổi: ${coinAmount.toFixed(6)}<br>
+        Số lượng coin: ${coinAmount}<br>
         Thay đổi giá: ${priceChange.toFixed(3)} USD<br>
         ${changeText}: ${changeAbsValue.toFixed(2)}%<br>
         ${profitText}: ${profitAbsValue.toFixed(2)} USD
@@ -287,8 +269,7 @@ function calculateSpotTarget() {
         type: 'spot',
         initialPrice,
         targetPrice,
-        investment,
-        coinAmount: coinAmount.toFixed(6),
+        coinAmount,
         priceChange: priceChange.toFixed(3),
         priceChangePercent: priceChangePercent.toFixed(2),
         profit: profit.toFixed(2)
